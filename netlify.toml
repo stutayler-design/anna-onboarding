@@ -3,6 +3,11 @@
   publish = "build"
   functions = "netlify/functions"
 
+[dev]
+  command = "npm run dev"
+  targetPort = 5173
+  autoLaunch = false
+
 [[redirects]]
   from = "/api/categorise"
   to = "/.netlify/functions/categorise"

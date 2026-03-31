@@ -47,8 +47,24 @@
 
 	async function startConversation() {
 		await addBotMessage(
-			'We may ask you for supporting documentation and other evidence of your business as part of our compliance checks',
-			[{ label: "Yes, let's do it", value: 'start' }]
+			'All done \u2013 your ID has been successfully verified',
+			[],
+			400
+		);
+		await addBotMessage(
+			'In order to open an ANNA account, we need to understand your business better. This is called Know Your Business (KYB)',
+			[],
+			400
+		);
+		await addBotMessage(
+			'KYB is a legal requirement, so providing clear and complete answers will ensure we get your business up and running with ANNA without delay',
+			[],
+			400
+		);
+		await addBotMessage(
+			'Depending on your answers we may ask you for supporting documentation and other evidence of your business as part of our compliance checks',
+			[{ label: "Yes, let\u2019s do it", value: 'start' }],
+			400
 		);
 	}
 
@@ -79,7 +95,7 @@
 				conversationStep = 'done';
 				inputDisabled = true;
 				await addBotMessage(
-					`Great! Your business has been categorised as "${pendingCategory}". Next, we\u2019ll need to verify your identity. Please have your photo ID ready.`
+					`Great! Your business has been categorised as "<strong>${pendingCategory}</strong>".`
 				);
 			} else if (chip.value === 'no') {
 				conversationStep = 'describe';
@@ -127,7 +143,7 @@
 				pendingCategory = data.category;
 				conversationStep = 'confirm';
 				await addBotMessage(
-					`It looks like your business would best be categorised as "${data.category}". Does that sound right?`,
+					`It looks like your business would best be categorised as "<strong>${data.category}</strong>". Does that sound right?`,
 					[
 						{ label: "Yes, that's right", value: 'yes' },
 						{ label: 'No', value: 'no' },
@@ -154,7 +170,7 @@
 		addUserMessage(category);
 		conversationStep = 'confirm';
 		await addBotMessage(
-			`It looks like your business would best be categorised as "${category}". Does that sound right?`,
+			`It looks like your business would best be categorised as "<strong>${category}</strong>". Does that sound right?`,
 			[
 				{ label: "Yes, that's right", value: 'yes' },
 				{ label: 'No', value: 'no' },
@@ -185,7 +201,7 @@
 	>
 		<!-- Header -->
 		<div class="flex items-center justify-between px-6 pt-14 pb-3">
-			<span class="text-2xl font-bold italic text-coral">ANNA</span>
+			<span class="anna-logo text-coral">ANNA</span>
 			<div class="flex gap-3 text-sm">
 				<button class="font-medium text-green">Get help</button>
 				<button class="font-medium text-dark">Sign out</button>
@@ -193,21 +209,21 @@
 		</div>
 
 		<!-- Chat Area -->
-		<div bind:this={chatArea} class="flex flex-1 flex-col gap-2 overflow-y-auto px-4 pb-2">
+		<div bind:this={chatArea} class="flex flex-1 flex-col gap-3 overflow-y-auto px-4 pb-2">
 			{#each messages as msg}
 				{#if msg.role === 'bot'}
-					<div class="max-w-[80%] self-start rounded-2xl rounded-bl-[5px] bg-white px-4 py-3 text-sm text-dark shadow-xs">
-						{msg.text}
+					<div class="max-w-[80%] self-start rounded-2xl rounded-bl-[5px] bg-white px-4 py-3 text-[15px] leading-relaxed text-dark">
+						{@html msg.text}
 					</div>
 				{:else}
-					<div class="max-w-[75%] self-end rounded-2xl rounded-br-[5px] bg-dark px-4 py-3 text-sm text-white shadow-xs">
+					<div class="max-w-[70%] self-end rounded-2xl rounded-br-[5px] bg-dark px-4 py-3 text-[15px] leading-relaxed text-white">
 						{msg.text}
 					</div>
 				{/if}
 			{/each}
 
 			{#if isTyping}
-				<div class="flex max-w-[80px] items-center gap-1 self-start rounded-2xl rounded-bl-[5px] bg-white px-4 py-3 shadow-xs">
+				<div class="flex max-w-[80px] items-center gap-1 self-start rounded-2xl rounded-bl-[5px] bg-white px-4 py-3">
 					<span class="typing-dot"></span>
 					<span class="typing-dot delay-1"></span>
 					<span class="typing-dot delay-2"></span>
@@ -217,13 +233,11 @@
 
 		<!-- Quick Reply Chips -->
 		{#if activeChips.length > 0}
-			<div class="flex gap-2 overflow-x-auto px-4 py-2 scrollbar-hide">
+			<div class="flex justify-end gap-2 overflow-x-auto px-4 py-3 scrollbar-hide">
 				{#each activeChips as chip}
 					<button
 						onclick={() => handleChip(chip)}
-						class={chip.ghost
-							? 'shrink-0 cursor-pointer rounded-full border border-green bg-transparent px-4 py-2 text-sm font-medium text-green transition-colors hover:bg-green/10'
-							: 'shrink-0 cursor-pointer rounded-full bg-dark px-4 py-2 text-sm font-medium text-white transition-colors hover:bg-dark/90'}
+						class="shrink-0 cursor-pointer rounded-xl bg-white px-5 py-3 text-[15px] font-medium text-green shadow-sm transition-colors hover:bg-gray-50"
 					>
 						{chip.label}
 					</button>
@@ -232,36 +246,39 @@
 		{/if}
 
 		<!-- Input Bar -->
-		<div class="flex items-center gap-2 border-t border-gray-200 bg-white px-4 py-3">
-			<button aria-label="Attach file" class="text-gray-400 hover:text-gray-600">
-				<svg xmlns="http://www.w3.org/2000/svg" class="h-6 w-6" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
-					<path stroke-linecap="round" stroke-linejoin="round" d="M15.172 7l-6.586 6.586a2 2 0 102.828 2.828l6.414-6.586a4 4 0 00-5.656-5.656l-6.415 6.585a6 6 0 108.486 8.486L20.5 13" />
-				</svg>
-			</button>
-			<input
-				type="text"
-				bind:value={inputText}
-				onkeydown={handleKeydown}
-				placeholder="Describe your business"
-				disabled={inputDisabled}
-				class="flex-1 bg-transparent text-sm text-dark placeholder-gray-400 outline-none disabled:opacity-50"
-			/>
-			<button aria-label="Take photo" class="text-gray-400 hover:text-gray-600">
-				<svg xmlns="http://www.w3.org/2000/svg" class="h-6 w-6" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
-					<path stroke-linecap="round" stroke-linejoin="round" d="M3 9a2 2 0 012-2h.93a2 2 0 001.664-.89l.812-1.22A2 2 0 0110.07 4h3.86a2 2 0 011.664.89l.812 1.22A2 2 0 0018.07 7H19a2 2 0 012 2v9a2 2 0 01-2 2H5a2 2 0 01-2-2V9z" />
-					<path stroke-linecap="round" stroke-linejoin="round" d="M15 13a3 3 0 11-6 0 3 3 0 016 0z" />
-				</svg>
-			</button>
-			<button
-				aria-label="Send message"
-				onclick={handleSend}
-				disabled={!inputText.trim() || inputDisabled}
-				class="flex h-8 w-8 shrink-0 cursor-pointer items-center justify-center rounded-full bg-green text-white transition-opacity disabled:cursor-not-allowed disabled:opacity-40"
-			>
-				<svg xmlns="http://www.w3.org/2000/svg" class="h-4 w-4" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
-					<path stroke-linecap="round" stroke-linejoin="round" d="M5 12h14M12 5l7 7-7 7" />
-				</svg>
-			</button>
+		<div class="px-4 pt-1 pb-10">
+			<div class="flex items-center gap-2 rounded-full border border-gray-300 bg-white px-4 py-2.5">
+				<input
+					type="text"
+					bind:value={inputText}
+					onkeydown={handleKeydown}
+					placeholder="Describe your business"
+					disabled={inputDisabled}
+					class="flex-1 bg-transparent text-[15px] text-dark placeholder-gray-400 outline-none disabled:opacity-50"
+				/>
+				<button aria-label="Attach file" class="shrink-0 text-gray-400 hover:text-gray-600">
+					<svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
+						<path stroke-linecap="round" stroke-linejoin="round" d="M15.172 7l-6.586 6.586a2 2 0 102.828 2.828l6.414-6.586a4 4 0 00-5.656-5.656l-6.415 6.585a6 6 0 108.486 8.486L20.5 13" />
+					</svg>
+				</button>
+				<button aria-label="Take photo" class="shrink-0 text-green hover:text-green/80">
+					<svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
+						<path stroke-linecap="round" stroke-linejoin="round" d="M3 9a2 2 0 012-2h.93a2 2 0 001.664-.89l.812-1.22A2 2 0 0110.07 4h3.86a2 2 0 011.664.89l.812 1.22A2 2 0 0018.07 7H19a2 2 0 012 2v9a2 2 0 01-2 2H5a2 2 0 01-2-2V9z" />
+						<path stroke-linecap="round" stroke-linejoin="round" d="M15 13a3 3 0 11-6 0 3 3 0 016 0z" />
+					</svg>
+				</button>
+				{#if inputText.trim() && !inputDisabled}
+					<button
+						aria-label="Send message"
+						onclick={handleSend}
+						class="flex h-8 w-8 shrink-0 cursor-pointer items-center justify-center rounded-full bg-green text-white"
+					>
+						<svg xmlns="http://www.w3.org/2000/svg" class="h-4 w-4" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
+							<path stroke-linecap="round" stroke-linejoin="round" d="M5 12h14M12 5l7 7-7 7" />
+						</svg>
+					</button>
+				{/if}
+			</div>
 		</div>
 	</div>
 </div>
@@ -345,5 +362,13 @@
 	.scrollbar-hide {
 		-ms-overflow-style: none;
 		scrollbar-width: none;
+	}
+
+	.anna-logo {
+		font-size: 28px;
+		font-weight: 800;
+		font-style: italic;
+		letter-spacing: 1px;
+		text-transform: uppercase;
 	}
 </style>
