@@ -19,11 +19,21 @@ ANTHROPIC_API_KEY=sk-ant-...
 
 ## Local Development
 
+Install the Netlify CLI once (global):
+
 ```sh
-npx netlify dev
+npm install -g netlify-cli
 ```
 
-This starts both the SvelteKit dev server and the Netlify functions runtime with redirects applied. Do **not** use `npm run dev` — the API proxy won't work without Netlify's dev server.
+Then from the project root:
+
+```sh
+netlify dev
+```
+
+Open **http://localhost:8888** — that's the port with the `/api/categorise → /.netlify/functions/categorise` redirect active. The Vite server at `:5173` will load the UI but the API call will 404.
+
+Do **not** use `npm run dev` or `npm run preview` — neither runs Netlify Functions, so the categorise endpoint will fail and you'll see "Sorry, something went wrong" in the chat. `netlify dev` auto-loads `ANTHROPIC_API_KEY` from `.env`.
 
 ## Deploy to Netlify
 
